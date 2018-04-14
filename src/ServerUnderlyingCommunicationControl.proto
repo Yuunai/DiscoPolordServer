@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+option java_outer_classname = "Succ";
+option java_package = "discopolord.protocol";
+//    protoc -I=D:/GitRepos/Study/DiscoPolordServer/src/ --java_out=D:/GitRepos/Study/DiscoPolordServer/src/ D:/GitRepos/Study/DiscoPolordServer/src/ServerUnderlyingCommunicationControl.proto
+
+
+message Message {
+    MessageType messageType = 1;
+
+    LoginData loginData = 2;
+
+    repeated UserStatus users = 7;
+    repeated UserAddress addresses = 8;
+
+    int32 dhP = 16;
+    int32 dhG = 17;
+    int32 dhX = 18;
+    int32 dhY = 19;
+
+    repeated int32 errorCauses = 20;
+
+    RegistrationData registrationData = 32;
+
+    enum MessageType {
+        DHPK = 0;
+        DHXN = 1;
+        DHYN = 2;
+        REGISTER = 3;
+        REGISTRATION_FAILED = 4;
+        REGISTRATION_SUCC = 5;
+        LOGIN = 6;
+        AUTH = 7;
+        NAUTH = 8;
+        R_REQ = 9;
+        R_LIST = 10;
+        R_UPD = 11;
+        CL_INV = 12;
+        CL_DEN = 13;
+        CL_ACC = 14;
+        CNF_INV = 15;
+        ADR = 16;
+        ADR_CNF = 17;
+        DISC = 18;
+    }
+
+    message RegistrationData {
+        string username = 1;
+        string email = 2;
+        string password = 3;
+        string identifier = 4;
+    }
+
+    message LoginData {
+        string email = 1;
+        string password = 2;
+    }
+
+    message UserStatus {
+        string username = 1;
+        string identifier = 2;
+        Status status = 3;
+    }
+
+    enum Status {
+        ONLINE = 0;
+        OFFLINE = 1;
+        BLOCKED = 2;
+        DELETED = 3;
+    }
+
+    message UserAddress {
+        string userIdentifier = 1;
+        string ip = 2;
+        int32 port = 3;
+    }
+
+}
