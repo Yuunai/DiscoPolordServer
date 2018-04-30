@@ -76,4 +76,22 @@ public class User {
                 ", email='" + email + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (userId != user.userId) return false;
+        return identifier.equals(user.identifier);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = userId;
+        result = 31 * result + identifier.hashCode();
+        return result;
+    }
 }

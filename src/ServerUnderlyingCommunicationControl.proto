@@ -32,9 +32,9 @@ message Message {
         LOGIN = 6;
         AUTH = 7;
         NAUTH = 8;
-        R_REQ = 9;
-        R_LIST = 10;
-        R_UPD = 11;
+        C_REQ = 9;
+        C_LIST = 10;
+        C_UPD = 11;
         CL_INV = 12;
         CL_DEN = 13;
         CL_ACC = 14;
@@ -67,6 +67,7 @@ message Message {
         OFFLINE = 1;
         BLOCKED = 2;
         DELETED = 3;
+        FRIEND = 4;
     }
 
     message UserAddress {

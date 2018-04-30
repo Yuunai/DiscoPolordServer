@@ -17,20 +17,20 @@ CREATE TABLE `user` (
   PRIMARY KEY(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
-DROP TABLE IF EXISTS `user_connection`;
+DROP TABLE IF EXISTS `user_contacts`;
 
-CREATE TABLE `user_relations` (
-  `user1_id` int NOT NULL,
-  `user2_id` int NOT NULL,
-  `relation_type` TINYINT NOT NULL,
+CREATE TABLE `user_contats` (
+  `user_id` int NOT NULL,
+  `contact_id` int NOT NULL,
+  `contact_type` TINYINT NOT NULL,
   
-  PRIMARY KEY(`user1_id`, `user2_id`),
-  CONSTRAINT `FK_USER1`
-  FOREIGN KEY(`user1_id`) REFERENCES `user`(`id`) 
+  PRIMARY KEY(`user_id`, `contact_id`),
+  CONSTRAINT `FK_USER`
+  FOREIGN KEY(`user_id`) REFERENCES `user`(`id`) 
   ON DELETE NO ACTION ON UPDATE NO ACTION,
   
-  CONSTRAINT `FK_USER2`
-  FOREIGN KEY(`user2_id`) REFERENCES `user`(`id`) 
+  CONSTRAINT `FK_CONTACT`
+  FOREIGN KEY(`contact_id`) REFERENCES `user`(`id`) 
   ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB;
 

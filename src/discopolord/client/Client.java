@@ -1,6 +1,7 @@
 package discopolord.client;
 
 import discopolord.database.UserService;
+import discopolord.entity.Contact;
 import discopolord.entity.User;
 import discopolord.event.UserConnectedEvent;
 import discopolord.event.UserDisconnectedEvent;
@@ -9,6 +10,7 @@ import discopolord.protocol.Succ;
 import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -42,6 +44,7 @@ public class Client extends Thread implements ClientStatusListener{
             output = socket.getOutputStream();
 
             // First step - Diffi Hellman
+            //TODO generate public numbers and send them
 
             // Second step - Auth/Register User
             while(user == null) {
@@ -49,10 +52,14 @@ public class Client extends Thread implements ClientStatusListener{
                 switch (message.getMessageType()) {
                     case LOGIN:
                         user = userService.getUser(message.getLoginData().getEmail(), message.getLoginData().getPassword());
-                        if (user != null)
+                        if (user != null) {
                             clientStatusServer.sendEvent(new UserConnectedEvent(user.getIdentifier()));
+                            sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.AUTH).build());
+                        } else {
+                            sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.NAUTH).build());
+                        }
                         break;
-
+Succ.Message.newBuilder().addAddresses()
                     case REGISTER:
                         int registrationStatus = userService.saveOrUpdateUser(
                                 new User(message.getRegistrationData().getIdentifier(),
@@ -75,6 +82,41 @@ public class Client extends Thread implements ClientStatusListener{
 
 
             // Third step - Communication
+            while(true) {
+                message = getMessage();
+                switch(message.getMessageType()) {
+                    case C_REQ:
+                        List<Succ.Message.UserStatus> userContacts= userService.getUserRelations(user.getUserId());
+                        sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.C_LIST).addAllUsers(userContacts).build());
+                        break;
+
+                    case C_UPD:
+                        for(Succ.Message.UserStatus status : message.getUsersList()) {
+                            int id = userService.getUserId(status.getIdentifier());
+                           switch (status.getStatus()) {
+                               case DELETED:
+                                   userService.deleteUserContact(user.getUserId(), id);
+                                   sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.C_UPD).addUsers(status).build());
+                                   break;
+
+                               case BLOCKED:
+                                   userService.saveOrUpdateUserContact(new Contact(user.getUserId(), id, Contact.RELATION_TYPE_BLOCKED));
+                                   sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.C_UPD).addUsers(status).build());
+                                   break;
+
+                               case FRIEND:
+                                   userService.saveOrUpdateUserContact(new Contact(user.getUserId(), id, Contact.RELATION_TYPE_FRIEND));
+                                   sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.C_UPD).addUsers(status).build());
+                                   break;
+                           }
+                        }
+                        break;
+
+                    case CL_INV:
+
+                }
+            }
+
 
             // Last step - Cleaning
 
@@ -121,6 +163,20 @@ public class Client extends Thread implements ClientStatusListener{
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Client client = (Client) o;
+
+        return user.equals(client.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return user.hashCode();
+    }
 
     @Override
     public void userConnected(String identifier) {

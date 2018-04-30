@@ -354,17 +354,17 @@ public final class Succ {
        */
       NAUTH(8),
       /**
-       * <code>R_REQ = 9;</code>
+       * <code>C_REQ = 9;</code>
        */
-      R_REQ(9),
+      C_REQ(9),
       /**
-       * <code>R_LIST = 10;</code>
+       * <code>C_LIST = 10;</code>
        */
-      R_LIST(10),
+      C_LIST(10),
       /**
-       * <code>R_UPD = 11;</code>
+       * <code>C_UPD = 11;</code>
        */
-      R_UPD(11),
+      C_UPD(11),
       /**
        * <code>CL_INV = 12;</code>
        */
@@ -433,17 +433,17 @@ public final class Succ {
        */
       public static final int NAUTH_VALUE = 8;
       /**
-       * <code>R_REQ = 9;</code>
+       * <code>C_REQ = 9;</code>
        */
-      public static final int R_REQ_VALUE = 9;
+      public static final int C_REQ_VALUE = 9;
       /**
-       * <code>R_LIST = 10;</code>
+       * <code>C_LIST = 10;</code>
        */
-      public static final int R_LIST_VALUE = 10;
+      public static final int C_LIST_VALUE = 10;
       /**
-       * <code>R_UPD = 11;</code>
+       * <code>C_UPD = 11;</code>
        */
-      public static final int R_UPD_VALUE = 11;
+      public static final int C_UPD_VALUE = 11;
       /**
        * <code>CL_INV = 12;</code>
        */
@@ -501,9 +501,9 @@ public final class Succ {
           case 6: return LOGIN;
           case 7: return AUTH;
           case 8: return NAUTH;
-          case 9: return R_REQ;
-          case 10: return R_LIST;
-          case 11: return R_UPD;
+          case 9: return C_REQ;
+          case 10: return C_LIST;
+          case 11: return C_UPD;
           case 12: return CL_INV;
           case 13: return CL_DEN;
           case 14: return CL_ACC;
@@ -584,6 +584,10 @@ public final class Succ {
        * <code>DELETED = 3;</code>
        */
       DELETED(3),
+      /**
+       * <code>FRIEND = 4;</code>
+       */
+      FRIEND(4),
       UNRECOGNIZED(-1),
       ;
 
@@ -603,6 +607,10 @@ public final class Succ {
        * <code>DELETED = 3;</code>
        */
       public static final int DELETED_VALUE = 3;
+      /**
+       * <code>FRIEND = 4;</code>
+       */
+      public static final int FRIEND_VALUE = 4;
 
 
       public final int getNumber() {
@@ -627,6 +635,7 @@ public final class Succ {
           case 1: return OFFLINE;
           case 2: return BLOCKED;
           case 3: return DELETED;
+          case 4: return FRIEND;
           default: return null;
         }
       }
@@ -5524,7 +5533,7 @@ public final class Succ {
   static {
     java.lang.String[] descriptorData = {
       "\n*ServerUnderlyingCommunicationControl.p" +
-      "roto\"\201\007\n\007Message\022)\n\013messageType\030\001 \001(\0162\024." +
+      "roto\"\215\007\n\007Message\022)\n\013messageType\030\001 \001(\0162\024." +
       "Message.MessageType\022%\n\tloginData\030\002 \001(\0132\022" +
       ".Message.LoginData\022\"\n\005users\030\007 \003(\0132\023.Mess" +
       "age.UserStatus\022\'\n\taddresses\030\010 \003(\0132\024.Mess" +
@@ -5542,12 +5551,12 @@ public final class Succ {
       "Type\022\010\n\004DHPK\020\000\022\010\n\004DHXN\020\001\022\010\n\004DHYN\020\002\022\014\n\010RE" +
       "GISTER\020\003\022\027\n\023REGISTRATION_FAILED\020\004\022\025\n\021REG" +
       "ISTRATION_SUCC\020\005\022\t\n\005LOGIN\020\006\022\010\n\004AUTH\020\007\022\t\n" +
-      "\005NAUTH\020\010\022\t\n\005R_REQ\020\t\022\n\n\006R_LIST\020\n\022\t\n\005R_UPD" +
+      "\005NAUTH\020\010\022\t\n\005C_REQ\020\t\022\n\n\006C_LIST\020\n\022\t\n\005C_UPD" +
       "\020\013\022\n\n\006CL_INV\020\014\022\n\n\006CL_DEN\020\r\022\n\n\006CL_ACC\020\016\022\013" +
       "\n\007CNF_INV\020\017\022\007\n\003ADR\020\020\022\013\n\007ADR_CNF\020\021\022\010\n\004DIS" +
-      "C\020\022\";\n\006Status\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022\013" +
-      "\n\007BLOCKED\020\002\022\013\n\007DELETED\020\003B\034\n\024discopolord." +
-      "protocolB\004Succb\006proto3"
+      "C\020\022\"G\n\006Status\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022\013" +
+      "\n\007BLOCKED\020\002\022\013\n\007DELETED\020\003\022\n\n\006FRIEND\020\004B\034\n\024" +
+      "discopolord.protocolB\004Succb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

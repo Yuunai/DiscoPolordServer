@@ -1,6 +1,6 @@
 package discopolord.database;
 
-import discopolord.entity.Relation;
+import discopolord.entity.Contact;
 import discopolord.entity.User;
 import discopolord.protocol.Succ;
 
@@ -49,9 +49,9 @@ public class UserService {
         }
     }
 
-    public int saveOrUpdateUserRelation(Relation relation) {
+    public int saveOrUpdateUserContact(Contact contact) {
         try {
-            discoDataSource.saveOrUpdateUserRelation(relation);
+            discoDataSource.saveOrUpdateUserContact(contact);
         } catch (SQLException e) {
             return -1;
         }
@@ -62,13 +62,21 @@ public class UserService {
         return discoDataSource.getUserRelations(userId);
     }
 
-    public int deleteUserRelation(int user1Id, int user2Id) {
+    public int deleteUserContact(int userId, int contactId) {
         try {
-            discoDataSource.deleteUserRelation(user1Id, user2Id);
+            discoDataSource.deleteUserContact(userId, contactId);
         } catch (SQLException e) {
             return -1;
         }
         return 1;
+    }
+
+    public int getUserId(String identifier) {
+        try {
+            return discoDataSource.getUserId(identifier);
+        } catch (SQLException e) {
+            return -1;
+        }
     }
 
 }

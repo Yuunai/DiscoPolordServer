@@ -1,7 +1,7 @@
 package discopolord;
 
 import discopolord.database.DiscoDataSource;
-import discopolord.entity.Relation;
+import discopolord.entity.Contact;
 import discopolord.entity.User;
 
 
@@ -25,10 +25,10 @@ public class Main {
 //
 //            discoDataSource.saveOrUpdateUser(new User(1, "SuperUser", "UserName", "Passwd", "Email@mail.com"));
 
-            discoDataSource.saveOrUpdateUserRelation(new Relation(1, 3, Relation.RELATION_TYPE_FRIEND));
+            discoDataSource.saveOrUpdateUserContact(new Contact(1, 3, Contact.RELATION_TYPE_FRIEND));
 
-            discoDataSource.saveOrUpdateUserRelation(new Relation(3, 1, Relation.RELATION_TYPE_BLOCKED));
-            discoDataSource.saveOrUpdateUserRelation(new Relation(1, 3, Relation.RELATION_TYPE_BLOCKED));
+            discoDataSource.saveOrUpdateUserContact(new Contact(3, 1, Contact.RELATION_TYPE_BLOCKED));
+            discoDataSource.saveOrUpdateUserContact(new Contact(1, 3, Contact.RELATION_TYPE_BLOCKED));
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

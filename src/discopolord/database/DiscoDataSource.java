@@ -1,6 +1,6 @@
 package discopolord.database;
 
-import discopolord.entity.Relation;
+import discopolord.entity.Contact;
 import discopolord.entity.User;
 import discopolord.protocol.Succ;
 
@@ -33,10 +33,10 @@ public class DiscoDataSource {
     public static final String COLUMN_USER_PASSWORD = "password";
     public static final String COLUMN_USER_EMAIL = "email";
 
-    public static final String TABLE_USER_RELATIONS = "user_relations";
-    public static final String COLUMN_USER_RELATIONS_USER1_ID = "user1_id";
-    public static final String COLUMN_USER_RELATIONS_USER2_ID = "user2_id";
-    public static final String COLUMN_USER_RELATIONS_RELATION_TYPE = "relation_type";
+    public static final String TABLE_USER_CONTACTS = "user_contacts";
+    public static final String COLUMN_USER_CONTACTS_USER_ID = "user_id";
+    public static final String COLUMN_USER_CONTACTS_CONTACT_ID = "contact_id";
+    public static final String COLUMN_USER_CONTACTS_CONTACT_TYPE = "contact_type";
 
     public static final int INDEX_USER_ID = 1;
     public static final int INDEX_USER_IDENTIFIER = 2;
@@ -53,12 +53,12 @@ public class DiscoDataSource {
             + COLUMN_USER_USERNAME + ", " + COLUMN_USER_PASSWORD + ", " + COLUMN_USER_EMAIL + ") VALUES (?, ?, ?, ?)";
 
     /** String used for user relations insertion */
-    public static final String INSERT_USER_RELATIONS = "INSERT INTO " + TABLE_USER_RELATIONS + "(" + COLUMN_USER_RELATIONS_USER1_ID + ", "
-            + COLUMN_USER_RELATIONS_USER2_ID + ", " + COLUMN_USER_RELATIONS_RELATION_TYPE + ") VALUES (?, ?, ?)";
+    public static final String INSERT_USER_RELATIONS = "INSERT INTO " + TABLE_USER_CONTACTS + "(" + COLUMN_USER_CONTACTS_USER_ID + ", "
+            + COLUMN_USER_CONTACTS_CONTACT_ID + ", " + COLUMN_USER_CONTACTS_CONTACT_TYPE + ") VALUES (?, ?, ?)";
 
     /** String used for user relation deletion */
-    public static final String DELETE_USER_RELATION = "DELETE FROM " + TABLE_USER_RELATIONS + " WHERE " + COLUMN_USER_RELATIONS_USER1_ID
-            + " = ? AND " + COLUMN_USER_RELATIONS_USER2_ID + " = ? ";
+    public static final String DELETE_USER_RELATION = "DELETE FROM " + TABLE_USER_CONTACTS + " WHERE " + COLUMN_USER_CONTACTS_USER_ID
+            + " = ? AND " + COLUMN_USER_CONTACTS_CONTACT_ID + " = ? ";
 
     private Connection conn;
 
@@ -217,10 +217,10 @@ public class DiscoDataSource {
 
         try (Statement statement = conn.createStatement();
              ResultSet results = statement.executeQuery(
-                     "SELECT " + COLUMN_USER_IDENTIFIER + ", " + COLUMN_USER_USERNAME + ", " + COLUMN_USER_RELATIONS_RELATION_TYPE
-                     + " FROM " + TABLE_USER_RELATIONS + " JOIN " + TABLE_USER_RELATIONS
-                     + " ON " + COLUMN_USER_RELATIONS_USER2_ID + " = " + COLUMN_USER_ID
-                     + " WHERE " + COLUMN_USER_RELATIONS_USER1_ID + " = " + id)) {
+                     "SELECT " + COLUMN_USER_IDENTIFIER + ", " + COLUMN_USER_USERNAME + ", " + COLUMN_USER_CONTACTS_CONTACT_TYPE
+                     + " FROM " + TABLE_USER_CONTACTS + " JOIN " + TABLE_USER_CONTACTS
+                     + " ON " + COLUMN_USER_CONTACTS_CONTACT_ID + " = " + COLUMN_USER_ID
+                     + " WHERE " + COLUMN_USER_CONTACTS_USER_ID + " = " + id)) {
 
             while(results.next()) {
                 result.add(Succ.Message.UserStatus.newBuilder()
@@ -242,23 +242,23 @@ public class DiscoDataSource {
      * Get relation between specified users
      * @param user1Id First user id
      * @param user2Id Second user id
-     * @return Relation between specified users
+     * @return Contact between specified users
      * @throws SQLException
      */
-    private Relation getRelation(int user1Id, int user2Id) throws SQLException{
-        Relation result = null;
+    private Contact getRelation(int user1Id, int user2Id) throws SQLException{
+        Contact result = null;
 
         try (Statement statement = conn.createStatement()) {
             ResultSet resultSet = statement.executeQuery("SELECT *"
-                    + " FROM " + TABLE_USER_RELATIONS
+                    + " FROM " + TABLE_USER_CONTACTS
                     + " WHERE "
-                    + COLUMN_USER_RELATIONS_USER1_ID + " = " + user1Id
+                    + COLUMN_USER_CONTACTS_USER_ID + " = " + user1Id
                     + " AND "
-                    + COLUMN_USER_RELATIONS_USER2_ID + " = " + user2Id);
+                    + COLUMN_USER_CONTACTS_CONTACT_ID + " = " + user2Id);
             while(resultSet.next()) {
-                result = new Relation();
-                result.setUser1Id(resultSet.getInt(INDEX_USER_RELATIONS_USER1_ID));
-                result.setUser2Id(resultSet.getInt(INDEX_USER_RELATIONS_USER2_ID));
+                result = new Contact();
+                result.setUserId(resultSet.getInt(INDEX_USER_RELATIONS_USER1_ID));
+                result.setContactId(resultSet.getInt(INDEX_USER_RELATIONS_USER2_ID));
                 result.setRelationType(resultSet.getByte(INDEX_USER_RELATIONS_RELATION_TYPE));
             }
         } catch (SQLException e) {
@@ -269,37 +269,53 @@ public class DiscoDataSource {
     }
 
     /**
-     * @param relation - relation to be saved or updated
+     * @param contact - contact to be saved or updated
      * @throws SQLException
      */
-    public void saveOrUpdateUserRelation(Relation relation) throws SQLException {
+    public void saveOrUpdateUserContact(Contact contact) throws SQLException {
 
-        Relation rel = getRelation(relation.getUser1Id(), relation.getUser2Id());
+        Contact rel = getRelation(contact.getUserId(), contact.getContactId());
 
         if(rel == null) {
-            insertIntoUserRelations.setInt(1, relation.getUser1Id());
-            insertIntoUserRelations.setInt(2, relation.getUser2Id());
-            insertIntoUserRelations.setInt(3, relation.getRelationType());
+            insertIntoUserRelations.setInt(1, contact.getUserId());
+            insertIntoUserRelations.setInt(2, contact.getContactId());
+            insertIntoUserRelations.setInt(3, contact.getRelationType());
             insertIntoUserRelations.executeUpdate();
         } else {
-            conn.createStatement().executeUpdate("UPDATE " + TABLE_USER_RELATIONS
+            conn.createStatement().executeUpdate("UPDATE " + TABLE_USER_CONTACTS
                     + " SET "
-                    + COLUMN_USER_RELATIONS_RELATION_TYPE + " = " + relation.getRelationType()
-                    + " WHERE " + COLUMN_USER_RELATIONS_USER1_ID + " = " + relation.getUser1Id()
-                    + " AND " + COLUMN_USER_RELATIONS_USER2_ID + " = " + relation.getUser2Id());
+                    + COLUMN_USER_CONTACTS_CONTACT_TYPE + " = " + contact.getRelationType()
+                    + " WHERE " + COLUMN_USER_CONTACTS_USER_ID + " = " + contact.getUserId()
+                    + " AND " + COLUMN_USER_CONTACTS_CONTACT_ID + " = " + contact.getContactId());
         }
     }
 
     /**
      * Delete relation between given users
-     * @param user1Id First user id
-     * @param user2Id Second user id
+     * @param userId User id
+     * @param contactId Contact id
      * @throws SQLException
      */
-    public void deleteUserRelation(int user1Id, int user2Id) throws SQLException {
-        deleteUserRelation.setInt(1, user1Id);
-        deleteUserRelation.setInt(2, user2Id);
+    public void deleteUserContact(int userId, int contactId) throws SQLException {
+        deleteUserRelation.setInt(1, userId);
+        deleteUserRelation.setInt(2, contactId);
         deleteUserRelation.executeUpdate();
+    }
+
+    public int getUserId(String identifier) throws SQLException {
+        try (Statement statement = conn.createStatement();
+             ResultSet results = statement.executeQuery("SELECT " + COLUMN_USER_ID
+                     + " FROM " + TABLE_USER
+                     + " WHERE " + COLUMN_USER_IDENTIFIER + " = \'" + identifier + "\'")) {
+
+            if(results.next()) {
+                return results.getInt(1);
+            } else {
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw e;
+        }
     }
 
 }
