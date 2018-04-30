@@ -59,7 +59,7 @@ public class Client extends Thread implements ClientStatusListener{
                             sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.NAUTH).build());
                         }
                         break;
-Succ.Message.newBuilder().addAddresses()
+
                     case REGISTER:
                         int registrationStatus = userService.saveOrUpdateUser(
                                 new User(message.getRegistrationData().getIdentifier(),
