@@ -1,5 +1,6 @@
 package discopolord.client;
 
+import discopolord.call.CallService;
 import discopolord.database.UserService;
 import discopolord.entity.Contact;
 import discopolord.entity.User;
@@ -54,6 +55,7 @@ public class Client extends Thread implements ClientStatusListener{
                         user = userService.getUser(message.getLoginData().getEmail(), message.getLoginData().getPassword());
                         if (user != null) {
                             clientStatusServer.sendEvent(new UserConnectedEvent(user.getIdentifier()));
+                            CallService.addClient(user.getIdentifier(), this);
                             sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.AUTH).build());
                         } else {
                             sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.NAUTH).build());
@@ -113,7 +115,24 @@ public class Client extends Thread implements ClientStatusListener{
                         break;
 
                     case CL_INV:
+                        if(!ClientStatusServer.isUserOnline(message.getAddresses(0).getUserIdentifier())
+                                || CallService.call(user.getIdentifier(), message.getAddresses(0)
+                                .getUserIdentifier()) != 1) {
+                            sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.CL_DEN).build());
+                        }
+                        break;
 
+                    case CL_ACC:
+                        CallService.acceptCall(user.getIdentifier());
+                        break;
+
+                    case CL_DEN:
+                        CallService.denyCall(user.getIdentifier(), message.getAddresses(0).getUserIdentifier());
+                        break;
+
+                    case DISC:
+                        CallService.disconnect(user.getIdentifier());
+                        break;
                 }
             }
 
@@ -143,9 +162,11 @@ public class Client extends Thread implements ClientStatusListener{
             }
         }
         clientStatusServer.sendEvent(new UserDisconnectedEvent(user.getIdentifier()));
+        CallService.removeClient(user.getIdentifier());
     }
 
     private Succ.Message getMessage() {
+//        TODO add decryption
         Succ.Message message = null;
         try {
             message = Succ.Message.parseFrom(input);
@@ -155,7 +176,8 @@ public class Client extends Thread implements ClientStatusListener{
         return message;
     }
 
-    private void sendMessage(Succ.Message message) {
+    public void sendMessage(Succ.Message message) {
+//        TODO add encryption
         try {
             message.writeTo(output);
         } catch (IOException e) {

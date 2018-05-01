@@ -9,8 +9,8 @@ import java.util.List;
 
 public class ClientStatusServer {
 
-    List<ClientStatusListener> listeners = new ArrayList<>();
-    List<String> onlineUsers = new ArrayList<>();
+    private static List<ClientStatusListener> listeners = new ArrayList<>();
+    private static List<String> onlineUsers = new ArrayList<>();
 
     public synchronized void sendEvent(UserEvent event) {
         if(event instanceof UserConnectedEvent) {
@@ -32,6 +32,13 @@ public class ClientStatusServer {
                 listener.userDisconnected(userIdentifier);
             }
         }
+    }
+
+    public static boolean isUserOnline(String identifier) {
+        if(onlineUsers.contains(identifier))
+            return true;
+
+        return false;
     }
 
 }
