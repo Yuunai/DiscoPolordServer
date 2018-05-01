@@ -127,7 +127,7 @@ public class Client extends Thread implements ClientStatusListener{
                         break;
 
                     case CL_DEN:
-                        CallService.denyCall(user.getIdentifier(), message.getAddresses(0).getUserIdentifier());
+                        CallService.denyCall(user.getIdentifier());
                         break;
 
                     case DISC:
