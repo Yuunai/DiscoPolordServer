@@ -41,6 +41,11 @@ public final class Succ {
     discopolord.protocol.Succ.Message.LoginDataOrBuilder getLoginDataOrBuilder();
 
     /**
+     * <code>bytes DH = 3;</code>
+     */
+    com.google.protobuf.ByteString getDH();
+
+    /**
      * <code>repeated .Message.UserStatus users = 7;</code>
      */
     java.util.List<discopolord.protocol.Succ.Message.UserStatus> 
@@ -89,26 +94,6 @@ public final class Succ {
         int index);
 
     /**
-     * <code>int32 dhP = 16;</code>
-     */
-    int getDhP();
-
-    /**
-     * <code>int32 dhG = 17;</code>
-     */
-    int getDhG();
-
-    /**
-     * <code>int32 dhX = 18;</code>
-     */
-    int getDhX();
-
-    /**
-     * <code>int32 dhY = 19;</code>
-     */
-    int getDhY();
-
-    /**
      * <code>repeated int32 errorCauses = 20;</code>
      */
     java.util.List<java.lang.Integer> getErrorCausesList();
@@ -148,12 +133,9 @@ public final class Succ {
     }
     private Message() {
       messageType_ = 0;
+      dH_ = com.google.protobuf.ByteString.EMPTY;
       users_ = java.util.Collections.emptyList();
       addresses_ = java.util.Collections.emptyList();
-      dhP_ = 0;
-      dhG_ = 0;
-      dhX_ = 0;
-      dhY_ = 0;
       errorCauses_ = java.util.Collections.emptyList();
     }
 
@@ -207,48 +189,33 @@ public final class Succ {
 
               break;
             }
+            case 26: {
+
+              dH_ = input.readBytes();
+              break;
+            }
             case 58: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
                 users_ = new java.util.ArrayList<discopolord.protocol.Succ.Message.UserStatus>();
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000008;
               }
               users_.add(
                   input.readMessage(discopolord.protocol.Succ.Message.UserStatus.parser(), extensionRegistry));
               break;
             }
             case 66: {
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
                 addresses_ = new java.util.ArrayList<discopolord.protocol.Succ.Message.UserAddress>();
-                mutable_bitField0_ |= 0x00000008;
+                mutable_bitField0_ |= 0x00000010;
               }
               addresses_.add(
                   input.readMessage(discopolord.protocol.Succ.Message.UserAddress.parser(), extensionRegistry));
               break;
             }
-            case 128: {
-
-              dhP_ = input.readInt32();
-              break;
-            }
-            case 136: {
-
-              dhG_ = input.readInt32();
-              break;
-            }
-            case 144: {
-
-              dhX_ = input.readInt32();
-              break;
-            }
-            case 152: {
-
-              dhY_ = input.readInt32();
-              break;
-            }
             case 160: {
-              if (!((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
                 errorCauses_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000100;
+                mutable_bitField0_ |= 0x00000020;
               }
               errorCauses_.add(input.readInt32());
               break;
@@ -256,9 +223,9 @@ public final class Succ {
             case 162: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000100) == 0x00000100) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020) && input.getBytesUntilLimit() > 0) {
                 errorCauses_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000100;
+                mutable_bitField0_ |= 0x00000020;
               }
               while (input.getBytesUntilLimit() > 0) {
                 errorCauses_.add(input.readInt32());
@@ -287,13 +254,13 @@ public final class Succ {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
           users_ = java.util.Collections.unmodifiableList(users_);
         }
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
           addresses_ = java.util.Collections.unmodifiableList(addresses_);
         }
-        if (((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
+        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
           errorCauses_ = java.util.Collections.unmodifiableList(errorCauses_);
         }
         this.unknownFields = unknownFields.build();
@@ -318,17 +285,9 @@ public final class Succ {
     public enum MessageType
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
-       * <code>DHPK = 0;</code>
+       * <code>DHN = 0;</code>
        */
-      DHPK(0),
-      /**
-       * <code>DHXN = 1;</code>
-       */
-      DHXN(1),
-      /**
-       * <code>DHYN = 2;</code>
-       */
-      DHYN(2),
+      DHN(0),
       /**
        * <code>REGISTER = 3;</code>
        */
@@ -397,17 +356,9 @@ public final class Succ {
       ;
 
       /**
-       * <code>DHPK = 0;</code>
+       * <code>DHN = 0;</code>
        */
-      public static final int DHPK_VALUE = 0;
-      /**
-       * <code>DHXN = 1;</code>
-       */
-      public static final int DHXN_VALUE = 1;
-      /**
-       * <code>DHYN = 2;</code>
-       */
-      public static final int DHYN_VALUE = 2;
+      public static final int DHN_VALUE = 0;
       /**
        * <code>REGISTER = 3;</code>
        */
@@ -492,9 +443,7 @@ public final class Succ {
 
       public static MessageType forNumber(int value) {
         switch (value) {
-          case 0: return DHPK;
-          case 1: return DHXN;
-          case 2: return DHYN;
+          case 0: return DHN;
           case 3: return REGISTER;
           case 4: return REGISTRATION_FAILED;
           case 5: return REGISTRATION_SUCC;
@@ -3803,6 +3752,15 @@ public final class Succ {
       return getLoginData();
     }
 
+    public static final int DH_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString dH_;
+    /**
+     * <code>bytes DH = 3;</code>
+     */
+    public com.google.protobuf.ByteString getDH() {
+      return dH_;
+    }
+
     public static final int USERS_FIELD_NUMBER = 7;
     private java.util.List<discopolord.protocol.Succ.Message.UserStatus> users_;
     /**
@@ -3873,42 +3831,6 @@ public final class Succ {
       return addresses_.get(index);
     }
 
-    public static final int DHP_FIELD_NUMBER = 16;
-    private int dhP_;
-    /**
-     * <code>int32 dhP = 16;</code>
-     */
-    public int getDhP() {
-      return dhP_;
-    }
-
-    public static final int DHG_FIELD_NUMBER = 17;
-    private int dhG_;
-    /**
-     * <code>int32 dhG = 17;</code>
-     */
-    public int getDhG() {
-      return dhG_;
-    }
-
-    public static final int DHX_FIELD_NUMBER = 18;
-    private int dhX_;
-    /**
-     * <code>int32 dhX = 18;</code>
-     */
-    public int getDhX() {
-      return dhX_;
-    }
-
-    public static final int DHY_FIELD_NUMBER = 19;
-    private int dhY_;
-    /**
-     * <code>int32 dhY = 19;</code>
-     */
-    public int getDhY() {
-      return dhY_;
-    }
-
     public static final int ERRORCAUSES_FIELD_NUMBER = 20;
     private java.util.List<java.lang.Integer> errorCauses_;
     /**
@@ -3966,29 +3888,20 @@ public final class Succ {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (messageType_ != discopolord.protocol.Succ.Message.MessageType.DHPK.getNumber()) {
+      if (messageType_ != discopolord.protocol.Succ.Message.MessageType.DHN.getNumber()) {
         output.writeEnum(1, messageType_);
       }
       if (loginData_ != null) {
         output.writeMessage(2, getLoginData());
+      }
+      if (!dH_.isEmpty()) {
+        output.writeBytes(3, dH_);
       }
       for (int i = 0; i < users_.size(); i++) {
         output.writeMessage(7, users_.get(i));
       }
       for (int i = 0; i < addresses_.size(); i++) {
         output.writeMessage(8, addresses_.get(i));
-      }
-      if (dhP_ != 0) {
-        output.writeInt32(16, dhP_);
-      }
-      if (dhG_ != 0) {
-        output.writeInt32(17, dhG_);
-      }
-      if (dhX_ != 0) {
-        output.writeInt32(18, dhX_);
-      }
-      if (dhY_ != 0) {
-        output.writeInt32(19, dhY_);
       }
       if (getErrorCausesList().size() > 0) {
         output.writeUInt32NoTag(162);
@@ -4008,13 +3921,17 @@ public final class Succ {
       if (size != -1) return size;
 
       size = 0;
-      if (messageType_ != discopolord.protocol.Succ.Message.MessageType.DHPK.getNumber()) {
+      if (messageType_ != discopolord.protocol.Succ.Message.MessageType.DHN.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, messageType_);
       }
       if (loginData_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getLoginData());
+      }
+      if (!dH_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, dH_);
       }
       for (int i = 0; i < users_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -4023,22 +3940,6 @@ public final class Succ {
       for (int i = 0; i < addresses_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(8, addresses_.get(i));
-      }
-      if (dhP_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(16, dhP_);
-      }
-      if (dhG_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(17, dhG_);
-      }
-      if (dhX_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(18, dhX_);
-      }
-      if (dhY_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(19, dhY_);
       }
       {
         int dataSize = 0;
@@ -4080,18 +3981,12 @@ public final class Succ {
         result = result && getLoginData()
             .equals(other.getLoginData());
       }
+      result = result && getDH()
+          .equals(other.getDH());
       result = result && getUsersList()
           .equals(other.getUsersList());
       result = result && getAddressesList()
           .equals(other.getAddressesList());
-      result = result && (getDhP()
-          == other.getDhP());
-      result = result && (getDhG()
-          == other.getDhG());
-      result = result && (getDhX()
-          == other.getDhX());
-      result = result && (getDhY()
-          == other.getDhY());
       result = result && getErrorCausesList()
           .equals(other.getErrorCausesList());
       result = result && (hasRegistrationData() == other.hasRegistrationData());
@@ -4116,6 +4011,8 @@ public final class Succ {
         hash = (37 * hash) + LOGINDATA_FIELD_NUMBER;
         hash = (53 * hash) + getLoginData().hashCode();
       }
+      hash = (37 * hash) + DH_FIELD_NUMBER;
+      hash = (53 * hash) + getDH().hashCode();
       if (getUsersCount() > 0) {
         hash = (37 * hash) + USERS_FIELD_NUMBER;
         hash = (53 * hash) + getUsersList().hashCode();
@@ -4124,14 +4021,6 @@ public final class Succ {
         hash = (37 * hash) + ADDRESSES_FIELD_NUMBER;
         hash = (53 * hash) + getAddressesList().hashCode();
       }
-      hash = (37 * hash) + DHP_FIELD_NUMBER;
-      hash = (53 * hash) + getDhP();
-      hash = (37 * hash) + DHG_FIELD_NUMBER;
-      hash = (53 * hash) + getDhG();
-      hash = (37 * hash) + DHX_FIELD_NUMBER;
-      hash = (53 * hash) + getDhX();
-      hash = (37 * hash) + DHY_FIELD_NUMBER;
-      hash = (53 * hash) + getDhY();
       if (getErrorCausesCount() > 0) {
         hash = (37 * hash) + ERRORCAUSES_FIELD_NUMBER;
         hash = (53 * hash) + getErrorCausesList().hashCode();
@@ -4279,28 +4168,22 @@ public final class Succ {
           loginData_ = null;
           loginDataBuilder_ = null;
         }
+        dH_ = com.google.protobuf.ByteString.EMPTY;
+
         if (usersBuilder_ == null) {
           users_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000008);
         } else {
           usersBuilder_.clear();
         }
         if (addressesBuilder_ == null) {
           addresses_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
         } else {
           addressesBuilder_.clear();
         }
-        dhP_ = 0;
-
-        dhG_ = 0;
-
-        dhX_ = 0;
-
-        dhY_ = 0;
-
         errorCauses_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000020);
         if (registrationDataBuilder_ == null) {
           registrationData_ = null;
         } else {
@@ -4337,31 +4220,28 @@ public final class Succ {
         } else {
           result.loginData_ = loginDataBuilder_.build();
         }
+        result.dH_ = dH_;
         if (usersBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
             users_ = java.util.Collections.unmodifiableList(users_);
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000008);
           }
           result.users_ = users_;
         } else {
           result.users_ = usersBuilder_.build();
         }
         if (addressesBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          if (((bitField0_ & 0x00000010) == 0x00000010)) {
             addresses_ = java.util.Collections.unmodifiableList(addresses_);
-            bitField0_ = (bitField0_ & ~0x00000008);
+            bitField0_ = (bitField0_ & ~0x00000010);
           }
           result.addresses_ = addresses_;
         } else {
           result.addresses_ = addressesBuilder_.build();
         }
-        result.dhP_ = dhP_;
-        result.dhG_ = dhG_;
-        result.dhX_ = dhX_;
-        result.dhY_ = dhY_;
-        if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
           errorCauses_ = java.util.Collections.unmodifiableList(errorCauses_);
-          bitField0_ = (bitField0_ & ~0x00000100);
+          bitField0_ = (bitField0_ & ~0x00000020);
         }
         result.errorCauses_ = errorCauses_;
         if (registrationDataBuilder_ == null) {
@@ -4417,11 +4297,14 @@ public final class Succ {
         if (other.hasLoginData()) {
           mergeLoginData(other.getLoginData());
         }
+        if (other.getDH() != com.google.protobuf.ByteString.EMPTY) {
+          setDH(other.getDH());
+        }
         if (usersBuilder_ == null) {
           if (!other.users_.isEmpty()) {
             if (users_.isEmpty()) {
               users_ = other.users_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000008);
             } else {
               ensureUsersIsMutable();
               users_.addAll(other.users_);
@@ -4434,7 +4317,7 @@ public final class Succ {
               usersBuilder_.dispose();
               usersBuilder_ = null;
               users_ = other.users_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000008);
               usersBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getUsersFieldBuilder() : null;
@@ -4447,7 +4330,7 @@ public final class Succ {
           if (!other.addresses_.isEmpty()) {
             if (addresses_.isEmpty()) {
               addresses_ = other.addresses_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000010);
             } else {
               ensureAddressesIsMutable();
               addresses_.addAll(other.addresses_);
@@ -4460,7 +4343,7 @@ public final class Succ {
               addressesBuilder_.dispose();
               addressesBuilder_ = null;
               addresses_ = other.addresses_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000010);
               addressesBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getAddressesFieldBuilder() : null;
@@ -4469,22 +4352,10 @@ public final class Succ {
             }
           }
         }
-        if (other.getDhP() != 0) {
-          setDhP(other.getDhP());
-        }
-        if (other.getDhG() != 0) {
-          setDhG(other.getDhG());
-        }
-        if (other.getDhX() != 0) {
-          setDhX(other.getDhX());
-        }
-        if (other.getDhY() != 0) {
-          setDhY(other.getDhY());
-        }
         if (!other.errorCauses_.isEmpty()) {
           if (errorCauses_.isEmpty()) {
             errorCauses_ = other.errorCauses_;
-            bitField0_ = (bitField0_ & ~0x00000100);
+            bitField0_ = (bitField0_ & ~0x00000020);
           } else {
             ensureErrorCausesIsMutable();
             errorCauses_.addAll(other.errorCauses_);
@@ -4683,12 +4554,41 @@ public final class Succ {
         return loginDataBuilder_;
       }
 
+      private com.google.protobuf.ByteString dH_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>bytes DH = 3;</code>
+       */
+      public com.google.protobuf.ByteString getDH() {
+        return dH_;
+      }
+      /**
+       * <code>bytes DH = 3;</code>
+       */
+      public Builder setDH(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        dH_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bytes DH = 3;</code>
+       */
+      public Builder clearDH() {
+        
+        dH_ = getDefaultInstance().getDH();
+        onChanged();
+        return this;
+      }
+
       private java.util.List<discopolord.protocol.Succ.Message.UserStatus> users_ =
         java.util.Collections.emptyList();
       private void ensureUsersIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
           users_ = new java.util.ArrayList<discopolord.protocol.Succ.Message.UserStatus>(users_);
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000008;
          }
       }
 
@@ -4838,7 +4738,7 @@ public final class Succ {
       public Builder clearUsers() {
         if (usersBuilder_ == null) {
           users_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000008);
           onChanged();
         } else {
           usersBuilder_.clear();
@@ -4915,7 +4815,7 @@ public final class Succ {
           usersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               discopolord.protocol.Succ.Message.UserStatus, discopolord.protocol.Succ.Message.UserStatus.Builder, discopolord.protocol.Succ.Message.UserStatusOrBuilder>(
                   users_,
-                  ((bitField0_ & 0x00000004) == 0x00000004),
+                  ((bitField0_ & 0x00000008) == 0x00000008),
                   getParentForChildren(),
                   isClean());
           users_ = null;
@@ -4926,9 +4826,9 @@ public final class Succ {
       private java.util.List<discopolord.protocol.Succ.Message.UserAddress> addresses_ =
         java.util.Collections.emptyList();
       private void ensureAddressesIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
           addresses_ = new java.util.ArrayList<discopolord.protocol.Succ.Message.UserAddress>(addresses_);
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000010;
          }
       }
 
@@ -5078,7 +4978,7 @@ public final class Succ {
       public Builder clearAddresses() {
         if (addressesBuilder_ == null) {
           addresses_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
           onChanged();
         } else {
           addressesBuilder_.clear();
@@ -5155,7 +5055,7 @@ public final class Succ {
           addressesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               discopolord.protocol.Succ.Message.UserAddress, discopolord.protocol.Succ.Message.UserAddress.Builder, discopolord.protocol.Succ.Message.UserAddressOrBuilder>(
                   addresses_,
-                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  ((bitField0_ & 0x00000010) == 0x00000010),
                   getParentForChildren(),
                   isClean());
           addresses_ = null;
@@ -5163,115 +5063,11 @@ public final class Succ {
         return addressesBuilder_;
       }
 
-      private int dhP_ ;
-      /**
-       * <code>int32 dhP = 16;</code>
-       */
-      public int getDhP() {
-        return dhP_;
-      }
-      /**
-       * <code>int32 dhP = 16;</code>
-       */
-      public Builder setDhP(int value) {
-        
-        dhP_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 dhP = 16;</code>
-       */
-      public Builder clearDhP() {
-        
-        dhP_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int dhG_ ;
-      /**
-       * <code>int32 dhG = 17;</code>
-       */
-      public int getDhG() {
-        return dhG_;
-      }
-      /**
-       * <code>int32 dhG = 17;</code>
-       */
-      public Builder setDhG(int value) {
-        
-        dhG_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 dhG = 17;</code>
-       */
-      public Builder clearDhG() {
-        
-        dhG_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int dhX_ ;
-      /**
-       * <code>int32 dhX = 18;</code>
-       */
-      public int getDhX() {
-        return dhX_;
-      }
-      /**
-       * <code>int32 dhX = 18;</code>
-       */
-      public Builder setDhX(int value) {
-        
-        dhX_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 dhX = 18;</code>
-       */
-      public Builder clearDhX() {
-        
-        dhX_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int dhY_ ;
-      /**
-       * <code>int32 dhY = 19;</code>
-       */
-      public int getDhY() {
-        return dhY_;
-      }
-      /**
-       * <code>int32 dhY = 19;</code>
-       */
-      public Builder setDhY(int value) {
-        
-        dhY_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 dhY = 19;</code>
-       */
-      public Builder clearDhY() {
-        
-        dhY_ = 0;
-        onChanged();
-        return this;
-      }
-
       private java.util.List<java.lang.Integer> errorCauses_ = java.util.Collections.emptyList();
       private void ensureErrorCausesIsMutable() {
-        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
+        if (!((bitField0_ & 0x00000020) == 0x00000020)) {
           errorCauses_ = new java.util.ArrayList<java.lang.Integer>(errorCauses_);
-          bitField0_ |= 0x00000100;
+          bitField0_ |= 0x00000020;
          }
       }
       /**
@@ -5328,7 +5124,7 @@ public final class Succ {
        */
       public Builder clearErrorCauses() {
         errorCauses_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000020);
         onChanged();
         return this;
       }
@@ -5533,12 +5329,11 @@ public final class Succ {
   static {
     java.lang.String[] descriptorData = {
       "\n*ServerUnderlyingCommunicationControl.p" +
-      "roto\"\215\007\n\007Message\022)\n\013messageType\030\001 \001(\0162\024." +
+      "roto\"\320\006\n\007Message\022)\n\013messageType\030\001 \001(\0162\024." +
       "Message.MessageType\022%\n\tloginData\030\002 \001(\0132\022" +
-      ".Message.LoginData\022\"\n\005users\030\007 \003(\0132\023.Mess" +
-      "age.UserStatus\022\'\n\taddresses\030\010 \003(\0132\024.Mess" +
-      "age.UserAddress\022\013\n\003dhP\030\020 \001(\005\022\013\n\003dhG\030\021 \001(" +
-      "\005\022\013\n\003dhX\030\022 \001(\005\022\013\n\003dhY\030\023 \001(\005\022\023\n\013errorCaus" +
+      ".Message.LoginData\022\n\n\002DH\030\003 \001(\014\022\"\n\005users\030" +
+      "\007 \003(\0132\023.Message.UserStatus\022\'\n\taddresses\030" +
+      "\010 \003(\0132\024.Message.UserAddress\022\023\n\013errorCaus" +
       "es\030\024 \003(\005\0223\n\020registrationData\030  \001(\0132\031.Mes" +
       "sage.RegistrationData\032Y\n\020RegistrationDat" +
       "a\022\020\n\010username\030\001 \001(\t\022\r\n\005email\030\002 \001(\t\022\020\n\010pa" +
@@ -5547,16 +5342,16 @@ public final class Succ {
       "\n\nUserStatus\022\020\n\010username\030\001 \001(\t\022\022\n\nidenti" +
       "fier\030\002 \001(\t\022\037\n\006status\030\003 \001(\0162\017.Message.Sta" +
       "tus\032?\n\013UserAddress\022\026\n\016userIdentifier\030\001 \001" +
-      "(\t\022\n\n\002ip\030\002 \001(\t\022\014\n\004port\030\003 \001(\005\"\374\001\n\013Message" +
-      "Type\022\010\n\004DHPK\020\000\022\010\n\004DHXN\020\001\022\010\n\004DHYN\020\002\022\014\n\010RE" +
-      "GISTER\020\003\022\027\n\023REGISTRATION_FAILED\020\004\022\025\n\021REG" +
-      "ISTRATION_SUCC\020\005\022\t\n\005LOGIN\020\006\022\010\n\004AUTH\020\007\022\t\n" +
-      "\005NAUTH\020\010\022\t\n\005C_REQ\020\t\022\n\n\006C_LIST\020\n\022\t\n\005C_UPD" +
-      "\020\013\022\n\n\006CL_INV\020\014\022\n\n\006CL_DEN\020\r\022\n\n\006CL_ACC\020\016\022\013" +
-      "\n\007CNF_INV\020\017\022\007\n\003ADR\020\020\022\013\n\007ADR_CNF\020\021\022\010\n\004DIS" +
-      "C\020\022\"G\n\006Status\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022\013" +
-      "\n\007BLOCKED\020\002\022\013\n\007DELETED\020\003\022\n\n\006FRIEND\020\004B\034\n\024" +
-      "discopolord.protocolB\004Succb\006proto3"
+      "(\t\022\n\n\002ip\030\002 \001(\t\022\014\n\004port\030\003 \001(\005\"\347\001\n\013Message" +
+      "Type\022\007\n\003DHN\020\000\022\014\n\010REGISTER\020\003\022\027\n\023REGISTRAT" +
+      "ION_FAILED\020\004\022\025\n\021REGISTRATION_SUCC\020\005\022\t\n\005L" +
+      "OGIN\020\006\022\010\n\004AUTH\020\007\022\t\n\005NAUTH\020\010\022\t\n\005C_REQ\020\t\022\n" +
+      "\n\006C_LIST\020\n\022\t\n\005C_UPD\020\013\022\n\n\006CL_INV\020\014\022\n\n\006CL_" +
+      "DEN\020\r\022\n\n\006CL_ACC\020\016\022\013\n\007CNF_INV\020\017\022\007\n\003ADR\020\020\022" +
+      "\013\n\007ADR_CNF\020\021\022\010\n\004DISC\020\022\"G\n\006Status\022\n\n\006ONLI" +
+      "NE\020\000\022\013\n\007OFFLINE\020\001\022\013\n\007BLOCKED\020\002\022\013\n\007DELETE" +
+      "D\020\003\022\n\n\006FRIEND\020\004B\034\n\024discopolord.protocolB" +
+      "\004Succb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5575,7 +5370,7 @@ public final class Succ {
     internal_static_Message_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Message_descriptor,
-        new java.lang.String[] { "MessageType", "LoginData", "Users", "Addresses", "DhP", "DhG", "DhX", "DhY", "ErrorCauses", "RegistrationData", });
+        new java.lang.String[] { "MessageType", "LoginData", "DH", "Users", "Addresses", "ErrorCauses", "RegistrationData", });
     internal_static_Message_RegistrationData_descriptor =
       internal_static_Message_descriptor.getNestedTypes().get(0);
     internal_static_Message_RegistrationData_fieldAccessorTable = new

@@ -1,5 +1,7 @@
 package discopolord.client;
 
+import com.google.protobuf.ByteString;
+import com.mysql.jdbc.StringUtils;
 import discopolord.call.CallService;
 import discopolord.database.UserService;
 import discopolord.entity.Contact;
@@ -7,9 +9,13 @@ import discopolord.entity.User;
 import discopolord.event.UserConnectedEvent;
 import discopolord.event.UserDisconnectedEvent;
 import discopolord.protocol.Succ;
+import discopolord.security.DHServer;
 
 import java.io.*;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +51,24 @@ public class Client extends Thread implements ClientStatusListener{
             output = socket.getOutputStream();
 
             // First step - Diffi Hellman
-            //TODO generate public numbers and send them
+            while (StringUtils.isNullOrEmpty(encryptionKey)) {
+                try {
+                    DHServer dhServer = new DHServer();
+                    sendMessage(Succ.Message.newBuilder()
+                            .setMessageType(Succ.Message.MessageType.DHN)
+                            .setDH(ByteString.copyFrom(dhServer.getPublicKeys()))
+                            .build());
+                    Succ.Message message = getMessage();
+                    if(message.getMessageType().equals(Succ.Message.MessageType.DHN)) {
+                        encryptionKey = dhServer.getSecret(message.getDH().toByteArray());
+                    }
+                } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+                    logger.warning("Implementation error: " + e.getMessage());
+                } catch (InvalidKeySpecException e) {
+                    logger.warning("Client DH error! " + e.getMessage());
+                }
 
+            }
             // Second step - Auth/Register User
             while(user == null) {
                 message = getMessage();
@@ -102,12 +124,12 @@ public class Client extends Thread implements ClientStatusListener{
                                    break;
 
                                case BLOCKED:
-                                   userService.saveOrUpdateUserContact(new Contact(user.getUserId(), id, Contact.RELATION_TYPE_BLOCKED));
+                                   userService.saveOrUpdateUserContact(new Contact(user.getUserId(), id, Contact.CONTACT_TYPE_BLOCKED));
                                    sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.C_UPD).addUsers(status).build());
                                    break;
 
                                case FRIEND:
-                                   userService.saveOrUpdateUserContact(new Contact(user.getUserId(), id, Contact.RELATION_TYPE_FRIEND));
+                                   userService.saveOrUpdateUserContact(new Contact(user.getUserId(), id, Contact.CONTACT_TYPE_FRIEND));
                                    sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.C_UPD).addUsers(status).build());
                                    break;
                            }

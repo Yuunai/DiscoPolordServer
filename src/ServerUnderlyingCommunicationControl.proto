@@ -7,25 +7,18 @@ option java_package = "discopolord.protocol";
 
 message Message {
     MessageType messageType = 1;
-
     LoginData loginData = 2;
+    bytes DH = 3;
 
     repeated UserStatus users = 7;
     repeated UserAddress addresses = 8;
-
-    int32 dhP = 16;
-    int32 dhG = 17;
-    int32 dhX = 18;
-    int32 dhY = 19;
 
     repeated int32 errorCauses = 20;
 
     RegistrationData registrationData = 32;
 
     enum MessageType {
-        DHPK = 0;
-        DHXN = 1;
-        DHYN = 2;
+        DHN = 0;
         REGISTER = 3;
         REGISTRATION_FAILED = 4;
         REGISTRATION_SUCC = 5;

@@ -2,20 +2,20 @@ package discopolord.entity;
 
 public class Contact {
 
-    public static final byte RELATION_TYPE_FRIEND = 1;
-    public static final byte RELATION_TYPE_BLOCKED = 2;
+    public static final byte CONTACT_TYPE_FRIEND = 1;
+    public static final byte CONTACT_TYPE_BLOCKED = 2;
 
     private int userId;
     private int contactId;
-    private byte relationType;
+    private byte contactType;
 
     public Contact() {
     }
 
-    public Contact(int userId, int contactId, byte relationType) {
+    public Contact(int userId, int contactId, byte contactType) {
         this.userId = userId;
         this.contactId = contactId;
-        this.relationType = relationType;
+        this.contactType = contactType;
     }
 
     public int getUserId() {
@@ -34,11 +34,11 @@ public class Contact {
         this.contactId = contactId;
     }
 
-    public byte getRelationType() {
-        return relationType;
+    public byte getContactType() {
+        return contactType;
     }
 
-    public void setRelationType(byte relationType) {
-        this.relationType = relationType;
+    public void setContactType(byte contactType) {
+        this.contactType = contactType;
     }
 }

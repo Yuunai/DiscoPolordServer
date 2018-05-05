@@ -259,7 +259,7 @@ public class DiscoDataSource {
                 result = new Contact();
                 result.setUserId(resultSet.getInt(INDEX_USER_RELATIONS_USER1_ID));
                 result.setContactId(resultSet.getInt(INDEX_USER_RELATIONS_USER2_ID));
-                result.setRelationType(resultSet.getByte(INDEX_USER_RELATIONS_RELATION_TYPE));
+                result.setContactType(resultSet.getByte(INDEX_USER_RELATIONS_RELATION_TYPE));
             }
         } catch (SQLException e) {
             throw e;
@@ -279,12 +279,12 @@ public class DiscoDataSource {
         if(rel == null) {
             insertIntoUserRelations.setInt(1, contact.getUserId());
             insertIntoUserRelations.setInt(2, contact.getContactId());
-            insertIntoUserRelations.setInt(3, contact.getRelationType());
+            insertIntoUserRelations.setInt(3, contact.getContactType());
             insertIntoUserRelations.executeUpdate();
         } else {
             conn.createStatement().executeUpdate("UPDATE " + TABLE_USER_CONTACTS
                     + " SET "
-                    + COLUMN_USER_CONTACTS_CONTACT_TYPE + " = " + contact.getRelationType()
+                    + COLUMN_USER_CONTACTS_CONTACT_TYPE + " = " + contact.getContactType()
                     + " WHERE " + COLUMN_USER_CONTACTS_USER_ID + " = " + contact.getUserId()
                     + " AND " + COLUMN_USER_CONTACTS_CONTACT_ID + " = " + contact.getContactId());
         }
