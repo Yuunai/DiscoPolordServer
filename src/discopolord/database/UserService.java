@@ -13,6 +13,7 @@ public class UserService {
 
     public UserService() {
         this.discoDataSource = DiscoDataSource.getInstance();
+        discoDataSource.open();
     }
 
     public User getUser(String email, String passwordHash) {

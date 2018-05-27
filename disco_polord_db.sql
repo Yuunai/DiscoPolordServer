@@ -19,7 +19,7 @@ CREATE TABLE `user` (
 
 DROP TABLE IF EXISTS `user_contacts`;
 
-CREATE TABLE `user_contats` (
+CREATE TABLE `user_contacts` (
   `user_id` int NOT NULL,
   `contact_id` int NOT NULL,
   `contact_type` TINYINT NOT NULL,

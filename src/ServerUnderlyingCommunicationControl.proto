@@ -9,6 +9,7 @@ message Message {
     MessageType messageType = 1;
     LoginData loginData = 2;
     bytes DH = 3;
+    bytes EPS = 4;
 
     repeated UserStatus users = 7;
     repeated UserAddress addresses = 8;
@@ -19,6 +20,7 @@ message Message {
 
     enum MessageType {
         DHN = 0;
+        EP = 1;
         REGISTER = 3;
         REGISTRATION_FAILED = 4;
         REGISTRATION_SUCC = 5;

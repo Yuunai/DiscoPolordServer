@@ -217,10 +217,10 @@ public class DiscoDataSource {
 
         try (Statement statement = conn.createStatement();
              ResultSet results = statement.executeQuery(
-                     "SELECT " + COLUMN_USER_IDENTIFIER + ", " + COLUMN_USER_USERNAME + ", " + COLUMN_USER_CONTACTS_CONTACT_TYPE
-                     + " FROM " + TABLE_USER_CONTACTS + " JOIN " + TABLE_USER_CONTACTS
-                     + " ON " + COLUMN_USER_CONTACTS_CONTACT_ID + " = " + COLUMN_USER_ID
-                     + " WHERE " + COLUMN_USER_CONTACTS_USER_ID + " = " + id)) {
+                     "SELECT u." + COLUMN_USER_IDENTIFIER + ", u." + COLUMN_USER_USERNAME + ", c." + COLUMN_USER_CONTACTS_CONTACT_TYPE
+                     + " FROM " + TABLE_USER + " u JOIN " + TABLE_USER_CONTACTS
+                     + " c ON c." + COLUMN_USER_CONTACTS_CONTACT_ID + " = u." + COLUMN_USER_ID
+                     + " WHERE c." + COLUMN_USER_CONTACTS_USER_ID + " = " + id)) {
 
             while(results.next()) {
                 result.add(Succ.Message.UserStatus.newBuilder()

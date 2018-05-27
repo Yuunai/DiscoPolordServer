@@ -14,7 +14,9 @@ public class CallService {
 
     private static Map<String, List<Call>> usersCalls = new HashMap<>();
 
-    public static int call(String callerIdentifier, String targetIdentifier) {
+    public static int call(Succ.Message.UserAddress address, String targetIdentifier) {
+        String callerIdentifier = address.getUserIdentifier();
+
         if(usersCalls.get(callerIdentifier) == null)
             usersCalls.put(callerIdentifier, new ArrayList<>());
 
@@ -26,8 +28,8 @@ public class CallService {
 
         List<Call> callerCalls = usersCalls.get(callerIdentifier);
         Client target = clients.get(targetIdentifier);
-        callerCalls.add(new Call(targetIdentifier, Call.CALL_SEND));
-        usersCalls.get(callerIdentifier).add(new Call(callerIdentifier, Call.CALL_SEND));
+        callerCalls.add(new Call(targetIdentifier, Call.CALL_SEND, null));
+        usersCalls.get(targetIdentifier).add(new Call(callerIdentifier, Call.CALL_SEND, address));
 
         if(callerCalls.size() == 1) {
             target.sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.CL_INV).build());
@@ -40,28 +42,53 @@ public class CallService {
         return 1;
     }
 
-    public static int acceptCall(String accepterIdentifier) {
+    public static int acceptCall(String accepterIdentifier, Succ.Message.UserAddress address) {
         List<Call> accepterCalls = usersCalls.get(accepterIdentifier);
         String callerIdentifier = accepterCalls.get(0).getCallerIdentifier();
         List<Call> callerCalls = usersCalls.get(callerIdentifier);
 
+        for(Call call : callerCalls) {
+            if(call.getCallerIdentifier().equals(accepterIdentifier)) {
+                call.setCallerAddress(address);
+            }
+        }
+
 //        TODO remember to set addresses everywhere
         if(clients.get(callerIdentifier) != null)
-            clients.get(callerIdentifier).sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.ADR).build());
+            clients.get(callerIdentifier).sendMessage(Succ.Message.newBuilder()
+                    .setMessageType(Succ.Message.MessageType.ADR)
+                    .addAddresses(address)
+                    .build());
+
         for(Call call : callerCalls) {
             if(call.getCallerIdentifier().equals(accepterIdentifier)) {
                 call.setCallStatus(Call.CALL_ONLINE);
             } else {
                 accepterCalls.add(call);
                 if(clients.get(call.getCallerIdentifier()) != null)
-                    clients.get(call.getCallerIdentifier()).sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.ADR).build());
+                    clients.get(call.getCallerIdentifier())
+                            .sendMessage(Succ.Message.newBuilder()
+                                    .setMessageType(Succ.Message.MessageType.ADR)
+                                    .addAddresses(address)
+                                    .build());
             }
         }
+
+        Succ.Message.Builder msgBuilder = Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.ADR);
+        for(Call call : accepterCalls) {
+            call.setCallStatus(Call.CALL_ONLINE);
+            msgBuilder.addAddresses(call.getCallerAddress());
+        }
+
+        clients.get(accepterIdentifier).sendMessage(msgBuilder.build());
 
         return 0;
     }
 
     public static void denyCall(String declinerIdentifier) {
+        if(usersCalls.get(declinerIdentifier) == null)
+            return;
+
         String callerIdentifier = usersCalls.get(declinerIdentifier).get(0).getCallerIdentifier();
         if(clients.get(callerIdentifier) != null)
             clients.get(callerIdentifier).sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.CL_DEN).build());
@@ -70,6 +97,8 @@ public class CallService {
     }
 
     public static void disconnect(String identifier) {
+        if(usersCalls.get(identifier) == null)
+            return;
         for(Call call : usersCalls.get(identifier)) {
             usersCalls.get(call.getCallerIdentifier()).removeIf(c -> c.getCallerIdentifier().equals(identifier));
         }

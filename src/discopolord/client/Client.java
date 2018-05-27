@@ -2,6 +2,7 @@ package discopolord.client;
 
 import com.google.protobuf.ByteString;
 import com.mysql.jdbc.StringUtils;
+import discopolord.call.Call;
 import discopolord.call.CallService;
 import discopolord.database.UserService;
 import discopolord.entity.Contact;
@@ -11,8 +12,13 @@ import discopolord.event.UserDisconnectedEvent;
 import discopolord.protocol.Succ;
 import discopolord.security.DHServer;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.Socket;
+import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -30,10 +36,15 @@ public class Client extends Thread implements ClientStatusListener{
 
     private User user;
     private String encryptionKey;
+    private SecretKeySpec secretKeySpec;
+    private Cipher encCipher;
+    private Cipher decCipher;
+    private boolean encryptionInitialized = false;
 
     private UserService userService = new UserService();
 
     private InputStream input;
+    private byte[] inputBuffer = new byte[2048];
     private OutputStream output;
 
     private Succ.Message message;
@@ -58,9 +69,23 @@ public class Client extends Thread implements ClientStatusListener{
                             .setMessageType(Succ.Message.MessageType.DHN)
                             .setDH(ByteString.copyFrom(dhServer.getPublicKeys()))
                             .build());
-                    Succ.Message message = getMessage();
+                    message = getMessage();
                     if(message.getMessageType().equals(Succ.Message.MessageType.DHN)) {
                         encryptionKey = dhServer.getSecret(message.getDH().toByteArray());
+                        secretKeySpec = new SecretKeySpec(encryptionKey.getBytes(), 0, 16, "AES");
+                        try {
+                            encCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                            decCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                            AlgorithmParameters aesParams = AlgorithmParameters.getInstance("AES");
+                            aesParams.init(message.getEPS().toByteArray());
+                            decCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, aesParams);
+                            encCipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
+                            sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.EP)
+                                    .setEPS(ByteString.copyFrom(encCipher.getParameters().getEncoded())).build());
+                            encryptionInitialized = true;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 } catch (NoSuchAlgorithmException | InvalidKeyException e) {
                     logger.warning("Implementation error: " + e.getMessage());
@@ -69,6 +94,7 @@ public class Client extends Thread implements ClientStatusListener{
                 }
 
             }
+
             // Second step - Auth/Register User
             while(user == null) {
                 message = getMessage();
@@ -138,14 +164,22 @@ public class Client extends Thread implements ClientStatusListener{
 
                     case CL_INV:
                         if(!ClientStatusServer.isUserOnline(message.getAddresses(0).getUserIdentifier())
-                                || CallService.call(user.getIdentifier(), message.getAddresses(0)
+                                || CallService.call(Succ.Message.UserAddress.newBuilder()
+                                    .setUserIdentifier(user.getIdentifier())
+                                    .setPort(message.getAddresses(0).getPort())
+                                    .setIp(socket.getInetAddress().getHostAddress()).build(), message.getAddresses(0)
                                 .getUserIdentifier()) != 1) {
                             sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.CL_DEN).build());
+                            logger.info("Call denied");
                         }
                         break;
 
                     case CL_ACC:
-                        CallService.acceptCall(user.getIdentifier());
+                        CallService.acceptCall(user.getIdentifier(), Succ.Message.UserAddress.newBuilder()
+                                .setUserIdentifier(user.getIdentifier())
+                                .setIp(socket.getInetAddress().getHostAddress())
+                                .setPort(message.getAddresses(0).getPort())
+                                .build());
                         break;
 
                     case CL_DEN:
@@ -155,6 +189,9 @@ public class Client extends Thread implements ClientStatusListener{
                     case DISC:
                         CallService.disconnect(user.getIdentifier());
                         break;
+
+                        default:
+//                            TODO incorrect message
                 }
             }
 
@@ -164,6 +201,9 @@ public class Client extends Thread implements ClientStatusListener{
 
         } catch (IOException e) {
             logger.warning(e.getMessage());
+        } catch (ClientDisconnectedException e) {
+            CallService.denyCall(user.getIdentifier());
+            CallService.disconnect(user.getIdentifier());
         } finally {
             try {
                 socket.close();
@@ -187,13 +227,22 @@ public class Client extends Thread implements ClientStatusListener{
         CallService.removeClient(user.getIdentifier());
     }
 
-    private Succ.Message getMessage() {
+    private Succ.Message getMessage() throws ClientDisconnectedException {
 //        TODO add decryption
         Succ.Message message = null;
         try {
-            message = Succ.Message.parseFrom(input);
+            if(encryptionInitialized) {
+                //TODO IllegalArgumentException
+                int dataLen = input.read(inputBuffer);
+                message = Succ.Message.parseFrom(decCipher.doFinal(inputBuffer, 0, dataLen));
+            } else {
+                message = Succ.Message.parseDelimitedFrom(input);
+            }
         } catch (IOException e) {
             logger.warning(e.getMessage());
+            throw new ClientDisconnectedException();
+        } catch (BadPaddingException | IllegalBlockSizeException e) {
+            e.printStackTrace();
         }
         return message;
     }
@@ -201,9 +250,15 @@ public class Client extends Thread implements ClientStatusListener{
     public void sendMessage(Succ.Message message) {
 //        TODO add encryption
         try {
-            message.writeTo(output);
+            if(encryptionInitialized) {
+                output.write(encCipher.doFinal(message.toByteArray()));
+            } else {
+                message.writeDelimitedTo(output);
+            }
         } catch (IOException e) {
             logger.warning(e.getMessage());
+        } catch (BadPaddingException | IllegalBlockSizeException e) {
+            e.printStackTrace();
         }
     }
 
