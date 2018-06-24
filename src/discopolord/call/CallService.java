@@ -32,7 +32,10 @@ public class CallService {
         usersCalls.get(targetIdentifier).add(new Call(callerIdentifier, Call.CALL_SEND, address));
 
         if(callerCalls.size() == 1) {
-            target.sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.CL_INV).build());
+            target.sendMessage(Succ.Message.newBuilder()
+                    .setMessageType(Succ.Message.MessageType.CL_INV)
+                    .addAddresses(address)
+                    .build());
 //            TODO add caller address/port
         } else {
             target.sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.CNF_INV).build());
@@ -86,8 +89,10 @@ public class CallService {
     }
 
     public static void denyCall(String declinerIdentifier) {
-        if(usersCalls.get(declinerIdentifier) == null)
+        List<Call> declinerCalls = usersCalls.get(declinerIdentifier);
+        if(declinerCalls == null || declinerCalls.isEmpty())
             return;
+
 
         String callerIdentifier = usersCalls.get(declinerIdentifier).get(0).getCallerIdentifier();
         if(clients.get(callerIdentifier) != null)
@@ -100,6 +105,9 @@ public class CallService {
         if(usersCalls.get(identifier) == null)
             return;
         for(Call call : usersCalls.get(identifier)) {
+            clients.get(call.getCallerIdentifier()).sendMessage(Succ.Message.newBuilder()
+                    .setMessageType(Succ.Message.MessageType.DISC)
+                    .build());
             usersCalls.get(call.getCallerIdentifier()).removeIf(c -> c.getCallerIdentifier().equals(identifier));
         }
         usersCalls.get(identifier).clear();
