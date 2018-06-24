@@ -1,9 +1,11 @@
 package discopolord.client;
 
+import discopolord.entity.User;
+
 public interface ClientStatusListener {
 
-    void userConnected(String identifier);
+    void userConnected(User user);
 
-    void userDisconnected(String identifier);
+    void userDisconnected(User user);
 
 }

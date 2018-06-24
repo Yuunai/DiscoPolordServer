@@ -20,6 +20,14 @@ public class UserService {
         return discoDataSource.getUser(email, passwordHash);
     }
 
+    public User getUser(int id) {
+        return discoDataSource.getUser(id);
+    }
+
+    public User getUser(String identifier) {
+        return discoDataSource.getUser(identifier);
+    }
+
     /**
      * Saves or update user
      * @param user User to be saved

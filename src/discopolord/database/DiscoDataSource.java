@@ -13,6 +13,8 @@ public class DiscoDataSource {
 
     Logger logger = Logger.getLogger(getClass().getSimpleName());
 
+    private boolean isConnectionOpen = false;
+
     /**
      * Database name
      */
@@ -67,6 +69,7 @@ public class DiscoDataSource {
     private PreparedStatement deleteUserRelation;
 
     private static DiscoDataSource instance = new DiscoDataSource();
+
     private DiscoDataSource() {
 
     }
@@ -79,6 +82,9 @@ public class DiscoDataSource {
     public boolean open() {
         try {
 //            TODO user, pass from props file
+            if (isConnectionOpen) {
+                return true;
+            }
             conn = DriverManager.getConnection(CONNECTION_STRING, "dbproject", "dbproject");
             insertIntoUsers = conn.prepareStatement(INSERT_USERS);
             insertIntoUserRelations = conn.prepareStatement(INSERT_USER_RELATIONS);
@@ -93,6 +99,8 @@ public class DiscoDataSource {
 
     public void close() {
         try {
+            isConnectionOpen = false;
+
             if(conn != null) {
                 conn.close();
             }
@@ -132,6 +140,54 @@ public class DiscoDataSource {
                  user.setUsername(results.getString(INDEX_USER_USERNAME));
                  user.setEmail(results.getString(INDEX_USER_EMAIL));
              }
+
+        } catch (SQLException e) {
+            logger.warning("Querry failed: " + e.getMessage());
+            return null;
+        }
+
+        return user;
+    }
+
+    public User getUser(int id) {
+        User user = null;
+
+        try (Statement statement = conn.createStatement();
+             ResultSet results = statement.executeQuery("SELECT *"
+                     + " FROM " + TABLE_USER
+                     + " WHERE " + COLUMN_USER_ID + " = " + id)) {
+
+            while(results.next()) {
+                user = new User();
+                user.setUserId(results.getInt(INDEX_USER_ID));
+                user.setIdentifier(results.getString(INDEX_USER_IDENTIFIER));
+                user.setUsername(results.getString(INDEX_USER_USERNAME));
+                user.setEmail(results.getString(INDEX_USER_EMAIL));
+            }
+
+        } catch (SQLException e) {
+            logger.warning("Querry failed: " + e.getMessage());
+            return null;
+        }
+
+        return user;
+    }
+
+    public User getUser(String identifier) {
+        User user = null;
+
+        try (Statement statement = conn.createStatement();
+             ResultSet results = statement.executeQuery("SELECT *"
+                     + " FROM " + TABLE_USER
+                     + " WHERE " + COLUMN_USER_IDENTIFIER + " = \'" + identifier + "\'")) {
+
+            while(results.next()) {
+                user = new User();
+                user.setUserId(results.getInt(INDEX_USER_ID));
+                user.setIdentifier(results.getString(INDEX_USER_IDENTIFIER));
+                user.setUsername(results.getString(INDEX_USER_USERNAME));
+                user.setEmail(results.getString(INDEX_USER_EMAIL));
+            }
 
         } catch (SQLException e) {
             logger.warning("Querry failed: " + e.getMessage());

@@ -22,6 +22,7 @@ import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,8 +104,12 @@ public class Client extends Thread implements ClientStatusListener{
                         user = userService.getUser(message.getLoginData().getEmail(), message.getLoginData().getPassword());
                         if (user != null) {
                             clientStatusServer.sendEvent(new UserConnectedEvent(user.getIdentifier()));
+                            clientStatusServer.addListener(this);
                             CallService.addClient(user.getIdentifier(), this);
                             sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.AUTH).build());
+                            for(Succ.Message.UserStatus s : getContacts(user.getUserId())) {
+                                userStatuses.put(s.getIdentifier(), s);
+                            }
                         } else {
                             sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.NAUTH).build());
                         }
@@ -136,27 +141,51 @@ public class Client extends Thread implements ClientStatusListener{
                 message = getMessage();
                 switch(message.getMessageType()) {
                     case C_REQ:
-                        List<Succ.Message.UserStatus> userContacts= userService.getUserRelations(user.getUserId());
-                        sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.C_LIST).addAllUsers(userContacts).build());
+                        sendMessage(Succ.Message.newBuilder()
+                                .setMessageType(Succ.Message.MessageType.C_LIST)
+                                .addAllUsers(getContacts(user.getUserId()))
+                                .build());
                         break;
 
                     case C_UPD:
                         for(Succ.Message.UserStatus status : message.getUsersList()) {
                             int id = userService.getUserId(status.getIdentifier());
+                            if(id == 0)
+                                continue;
+
+                            User statusUser = userService.getUser(id);
                            switch (status.getStatus()) {
                                case DELETED:
                                    userService.deleteUserContact(user.getUserId(), id);
                                    sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.C_UPD).addUsers(status).build());
+                                   userStatuses.remove(statusUser.getIdentifier());
                                    break;
 
                                case BLOCKED:
+                                   Succ.Message.UserStatus updStatusBlocked = Succ.Message.UserStatus.newBuilder()
+                                           .setIdentifier(statusUser.getIdentifier())
+                                           .setUsername(statusUser.getUsername())
+                                           .setStatus(Succ.Message.Status.BLOCKED).build();
+                                   userStatuses.put(statusUser.getIdentifier(), updStatusBlocked);
                                    userService.saveOrUpdateUserContact(new Contact(user.getUserId(), id, Contact.CONTACT_TYPE_BLOCKED));
-                                   sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.C_UPD).addUsers(status).build());
+                                   sendMessage(Succ.Message.newBuilder()
+                                           .setMessageType(Succ.Message.MessageType.C_UPD)
+                                           .addUsers(updStatusBlocked)
+                                           .build());
                                    break;
 
                                case FRIEND:
+                                   Succ.Message.UserStatus updStatusFriend = Succ.Message.UserStatus.newBuilder()
+                                           .setIdentifier(statusUser.getIdentifier())
+                                           .setUsername(statusUser.getUsername())
+                                           .setStatus(clientStatusServer.isUserOnline(statusUser.getIdentifier()) ? Succ.Message.Status.ONLINE : Succ.Message.Status.OFFLINE)
+                                           .build();
+                                   userStatuses.put(statusUser.getIdentifier(), updStatusFriend);
                                    userService.saveOrUpdateUserContact(new Contact(user.getUserId(), id, Contact.CONTACT_TYPE_FRIEND));
-                                   sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.C_UPD).addUsers(status).build());
+                                   sendMessage(Succ.Message.newBuilder()
+                                           .setMessageType(Succ.Message.MessageType.C_UPD)
+                                           .addUsers(updStatusFriend)
+                                           .build());
                                    break;
                            }
                         }
@@ -170,7 +199,6 @@ public class Client extends Thread implements ClientStatusListener{
                                     .setIp(socket.getInetAddress().getHostAddress()).build(), message.getAddresses(0)
                                 .getUserIdentifier()) != 1) {
                             sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.CL_DEN).build());
-                            logger.info("Call denied");
                         }
                         break;
 
@@ -202,8 +230,10 @@ public class Client extends Thread implements ClientStatusListener{
         } catch (IOException e) {
             logger.warning(e.getMessage());
         } catch (ClientDisconnectedException e) {
-            CallService.denyCall(user.getIdentifier());
-            CallService.disconnect(user.getIdentifier());
+            if(user != null) {
+                CallService.denyCall(user.getIdentifier());
+                CallService.disconnect(user.getIdentifier());
+            }
         } finally {
             try {
                 socket.close();
@@ -223,8 +253,30 @@ public class Client extends Thread implements ClientStatusListener{
                 logger.warning(e.getMessage());
             }
         }
-        clientStatusServer.sendEvent(new UserDisconnectedEvent(user.getIdentifier()));
-        CallService.removeClient(user.getIdentifier());
+        if(user != null) {
+            clientStatusServer.removeListener(this);
+            clientStatusServer.sendEvent(new UserDisconnectedEvent(user.getIdentifier()));
+            CallService.removeClient(user.getIdentifier());
+        }
+    }
+
+    private List<Succ.Message.UserStatus> getContacts(int id) {
+        List<Succ.Message.UserStatus> userContacts= userService.getUserRelations(id);
+        List<Succ.Message.UserStatus> userContactsStatuses = new ArrayList<>();
+        for(Succ.Message.UserStatus st : userContacts) {
+            if(st.getStatusValue() == Contact.CONTACT_TYPE_FRIEND
+                    && clientStatusServer.isUserOnline(st.getIdentifier())) {
+                userContactsStatuses.add(Succ.Message.UserStatus.newBuilder()
+                        .setUsername(st.getUsername())
+                        .setStatus(Succ.Message.Status.ONLINE)
+                        .setIdentifier(st.getIdentifier())
+                        .build());
+            } else {
+                userContactsStatuses.add(st);
+            }
+        }
+
+        return userContactsStatuses;
     }
 
     private Succ.Message getMessage() throws ClientDisconnectedException {
@@ -278,21 +330,35 @@ public class Client extends Thread implements ClientStatusListener{
     }
 
     @Override
-    public void userConnected(String identifier) {
-        if(userStatuses.keySet().contains(identifier) && userStatuses.get(identifier).getStatusValue() != 2) {
-            userStatuses.put(identifier, Succ.Message.UserStatus.newBuilder()
+    public void userConnected(User us) {
+        String identifier = us.getIdentifier();
+        if(userStatuses.keySet().contains(identifier) && userStatuses.get(identifier).getStatus() != Succ.Message.Status.BLOCKED) {
+            Succ.Message.UserStatus updateStatus = Succ.Message.UserStatus.newBuilder()
                     .mergeFrom(userStatuses.get(identifier))
                     .setStatusValue(Succ.Message.Status.ONLINE_VALUE)
+                    .setUsername(us.getUsername())
+                    .build();
+            userStatuses.put(identifier, updateStatus);
+            sendMessage(Succ.Message.newBuilder()
+                    .setMessageType(Succ.Message.MessageType.C_UPD)
+                    .addUsers(updateStatus)
                     .build());
         }
     }
 
     @Override
-    public void userDisconnected(String identifier) {
-        if(userStatuses.keySet().contains(identifier) && userStatuses.get(identifier).getStatusValue() != 2) {
-            userStatuses.put(identifier, Succ.Message.UserStatus.newBuilder()
+    public void userDisconnected(User us) {
+        String identifier = us.getIdentifier();
+        if(userStatuses.keySet().contains(identifier) && userStatuses.get(identifier).getStatus() != Succ.Message.Status.BLOCKED) {
+            Succ.Message.UserStatus updateStatus = Succ.Message.UserStatus.newBuilder()
                     .mergeFrom(userStatuses.get(identifier))
                     .setStatusValue(Succ.Message.Status.OFFLINE_VALUE)
+                    .setUsername(us.getUsername())
+                    .build();
+            userStatuses.put(identifier, updateStatus);
+            sendMessage(Succ.Message.newBuilder()
+                    .setMessageType(Succ.Message.MessageType.C_UPD)
+                    .addUsers(updateStatus)
                     .build());
         }
     }
