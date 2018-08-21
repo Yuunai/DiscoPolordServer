@@ -16,10 +16,12 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.*;
 import java.net.Socket;
 import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ public class Client extends Thread implements ClientStatusListener{
     private Cipher encCipher;
     private Cipher decCipher;
     private boolean encryptionInitialized = false;
+    private MessageDigest messageDigest;
 
     private UserService userService = new UserService();
 
@@ -54,6 +57,11 @@ public class Client extends Thread implements ClientStatusListener{
     public Client(Socket socket, ClientStatusServer clientStatusServer) {
         this.socket = socket;
         this.clientStatusServer = clientStatusServer;
+        try {
+            this.messageDigest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            //Impossible
+        }
     }
 
 
@@ -101,12 +109,22 @@ public class Client extends Thread implements ClientStatusListener{
                 message = getMessage();
                 switch (message.getMessageType()) {
                     case LOGIN:
-                        user = userService.getUser(message.getLoginData().getEmail(), message.getLoginData().getPassword());
+                        user = userService.getUser(message.getLoginData().getEmail(), new HexBinaryAdapter()
+                                .marshal(messageDigest.digest(message
+                                        .getLoginData()
+                                        .getPassword()
+                                        .getBytes("UTF-8"))));
                         if (user != null) {
                             clientStatusServer.sendEvent(new UserConnectedEvent(user.getIdentifier()));
                             clientStatusServer.addListener(this);
                             CallService.addClient(user.getIdentifier(), this);
-                            sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.AUTH).build());
+                            sendMessage(Succ.Message.newBuilder()
+                                    .setMessageType(Succ.Message.MessageType.AUTH)
+                                    .addUsers(Succ.Message.UserStatus.newBuilder()
+                                            .setUsername(user.getUsername())
+                                            .setIdentifier(user.getIdentifier())
+                                            .build())
+                                    .build());
                             for(Succ.Message.UserStatus s : getContacts(user.getUserId())) {
                                 userStatuses.put(s.getIdentifier(), s);
                             }
@@ -119,7 +137,11 @@ public class Client extends Thread implements ClientStatusListener{
                         int registrationStatus = userService.saveOrUpdateUser(
                                 new User(message.getRegistrationData().getIdentifier(),
                                         message.getRegistrationData().getUsername(),
-                                        message.getRegistrationData().getPassword(),
+                                        new HexBinaryAdapter()
+                                                .marshal(messageDigest.digest(message
+                                                        .getRegistrationData()
+                                                        .getPassword()
+                                                        .getBytes("UTF-8"))),
                                         message.getRegistrationData().getEmail()));
                         if(registrationStatus == 1) {
                             sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.REGISTRATION_SUCC).build());
@@ -150,8 +172,10 @@ public class Client extends Thread implements ClientStatusListener{
                     case C_UPD:
                         for(Succ.Message.UserStatus status : message.getUsersList()) {
                             int id = userService.getUserId(status.getIdentifier());
-                            if(id == 0)
+                            if(id == 0) {
+                                sendMessage(Succ.Message.newBuilder().setMessageType(Succ.Message.MessageType.C_UPD).build());
                                 continue;
+                            }
 
                             User statusUser = userService.getUser(id);
                            switch (status.getStatus()) {

@@ -12,8 +12,8 @@ CREATE TABLE `user` (
   `id` int NOT NULL AUTO_INCREMENT,
   `identifier` varchar(20) UNIQUE NOT NULL,
   `username` varchar(20) NOT NULL,
-  `password` varchar(20) NOT NULL,
-  `email` varchar(40) NOT NULL,
+  `password` varchar(64) NOT NULL,
+  `email` varchar(50) NOT NULL,
   PRIMARY KEY(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 

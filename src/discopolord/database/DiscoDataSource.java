@@ -4,26 +4,41 @@ import discopolord.entity.Contact;
 import discopolord.entity.User;
 import discopolord.protocol.Succ;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 public class DiscoDataSource {
 
-    Logger logger = Logger.getLogger(getClass().getSimpleName());
+    private static Logger logger = Logger.getLogger(DiscoDataSource.class.getSimpleName());
+
+    private static Properties props = new Properties();
 
     private boolean isConnectionOpen = false;
 
-    /**
-     * Database name
-     */
-    public static final String DB_NAME = "discopolord.db";
+    private static final String DB_NAME_KEY = "database.name";
 
-    /**
-     * Database connection string
-     */
-    public static final String CONNECTION_STRING = "jdbc:mysql://localhost:3306/" + DB_NAME;
+    private static final String DB_ADDRESS_KEY = "database.address";
+
+    private static final String DB_USER_KEY = "database.user";
+
+    private static final String DB_PASSOWRD_KEY = "database.password";
+
+    private static String DB_NAME;
+
+    private static String DB_ADDRESS;
+
+    private static String DB_USER;
+
+    private static String DB_PASSWORD;
+
+    private static String CONNECTION_STRING;
 
     /**
      * Database tables/culumns names
@@ -71,7 +86,13 @@ public class DiscoDataSource {
     private static DiscoDataSource instance = new DiscoDataSource();
 
     private DiscoDataSource() {
+        initializeProperties();
+        DB_NAME = props.getProperty(DB_NAME_KEY);
+        DB_ADDRESS = props.getProperty(DB_ADDRESS_KEY);
+        DB_USER = props.getProperty(DB_USER_KEY);
+        DB_PASSWORD = props.getProperty(DB_PASSOWRD_KEY);
 
+        CONNECTION_STRING = "jdbc:mysql://" + (DB_ADDRESS.endsWith("/") ? DB_ADDRESS : (DB_ADDRESS + "/")) + DB_NAME;
     }
 
     public static DiscoDataSource getInstance() {
@@ -81,11 +102,10 @@ public class DiscoDataSource {
 
     public boolean open() {
         try {
-//            TODO user, pass from props file
             if (isConnectionOpen) {
                 return true;
             }
-            conn = DriverManager.getConnection(CONNECTION_STRING, "dbproject", "dbproject");
+            conn = DriverManager.getConnection(CONNECTION_STRING, DB_USER, DB_PASSWORD);
             insertIntoUsers = conn.prepareStatement(INSERT_USERS);
             insertIntoUserRelations = conn.prepareStatement(INSERT_USER_RELATIONS);
             deleteUserRelation = conn.prepareStatement(DELETE_USER_RELATION);
@@ -371,6 +391,20 @@ public class DiscoDataSource {
             }
         } catch (SQLException e) {
             throw e;
+        }
+    }
+
+    public static void initializeProperties() {
+        logger.info("Loading database config file...");
+        try {
+
+            InputStream propsInput = new FileInputStream("database_config.properties");
+            props.load(propsInput);
+            logger.info("Database config file loaded...");
+        } catch (FileNotFoundException e) {
+            logger.warning("Database properties file not found: " + e.getMessage());
+        } catch (IOException e) {
+            logger.warning("Database properties file loading failed: " + e.getMessage());
         }
     }
 

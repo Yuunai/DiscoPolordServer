@@ -14,7 +14,7 @@ public class CallService {
 
     private static Map<String, List<Call>> usersCalls = new HashMap<>();
 
-    public static int call(Succ.Message.UserAddress address, String targetIdentifier) {
+    public static synchronized int call(Succ.Message.UserAddress address, String targetIdentifier) {
         String callerIdentifier = address.getUserIdentifier();
 
         if(usersCalls.get(callerIdentifier) == null)
@@ -45,7 +45,7 @@ public class CallService {
         return 1;
     }
 
-    public static int acceptCall(String accepterIdentifier, Succ.Message.UserAddress address) {
+    public static synchronized int acceptCall(String accepterIdentifier, Succ.Message.UserAddress address) {
         List<Call> accepterCalls = usersCalls.get(accepterIdentifier);
         String callerIdentifier = accepterCalls.get(0).getCallerIdentifier();
         List<Call> callerCalls = usersCalls.get(callerIdentifier);
@@ -88,7 +88,7 @@ public class CallService {
         return 0;
     }
 
-    public static void denyCall(String declinerIdentifier) {
+    public static synchronized void denyCall(String declinerIdentifier) {
         List<Call> declinerCalls = usersCalls.get(declinerIdentifier);
         if(declinerCalls == null || declinerCalls.isEmpty())
             return;
@@ -101,7 +101,7 @@ public class CallService {
         usersCalls.get(callerIdentifier).removeIf(c -> c.getCallerIdentifier().equals(declinerIdentifier));
     }
 
-    public static void disconnect(String identifier) {
+    public static synchronized void disconnect(String identifier) {
         if(usersCalls.get(identifier) == null)
             return;
         for(Call call : usersCalls.get(identifier)) {
@@ -113,11 +113,11 @@ public class CallService {
         usersCalls.get(identifier).clear();
     }
 
-    public static void addClient(String identifier, Client client) {
+    public static synchronized void addClient(String identifier, Client client) {
         clients.put(identifier, client);
     }
 
-    public static void removeClient(String identifier) {
+    public static synchronized void removeClient(String identifier) {
         clients.remove(identifier);
     }
 
